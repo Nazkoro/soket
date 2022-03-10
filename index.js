@@ -5,10 +5,16 @@ const io = require("socket.io")(8900, {
 });
 console.log("server start")
 let users = [];
+let usersInRoom = [];
 
 const addUser = (userId, socketId) => {
     !users.some((user) => user.userId === userId) &&
     users.push({ userId, socketId });
+};
+
+const addUserToRoom = (userId, socketId) => {
+    !usersInRoom.some((user) => user.userId === userId) &&
+    usersInRoom.push({ userId, socketId });
 };
 
 const removeUser = (socketId) => {
@@ -18,6 +24,7 @@ const removeUser = (socketId) => {
 const getUser = (userId) => {
     return users.find((user) => user.userId === userId);
 };
+
 io.on("connection", (socket) => {
     //when ceonnect
     console.log("a user connected.");
@@ -37,6 +44,31 @@ io.on("connection", (socket) => {
             const user = getUser(receiverId);
             console.log("line 37 user", user)
             io.to(user.socketId).emit("getMessage", {
+                senderId,
+                text,
+            });
+        }
+        catch(err){
+            console.log("line 45", err)
+        }
+
+    });
+
+    //take userId and socketId from userRppm
+    socket.on("addUserToRoom", (userId) => {
+        console.log("line 27 userId",userId)
+        addUserToRoom(userId, socket.id);
+        io.emit("getUsersInRoom", usersInRoom);
+    });
+
+    //send and get message in room
+    socket.on("sendMessageToRoom", ({ senderId, roomId, text }) => {
+        try{
+            console.log("line 53",senderId, roomId, text)
+            console.log("line 54 ",users)
+            // const user = getUser(receiverId);
+            // console.log("line 37 user", user)
+            io.to(roomId).emit("getMessage", {
                 senderId,
                 text,
             });
