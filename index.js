@@ -12,10 +12,10 @@ const addUser = (userId, socketId) => {
     users.push({ userId, socketId });
 };
 
-const addUserToRoom = (userId, socketId) => {
-    !usersInRoom.some((user) => user.userId === userId) &&
-    usersInRoom.push({ userId, socketId });
-};
+// const addUserToRoom = (userId, socketId) => {
+//     !usersInRoom.some((user) => user.userId === userId) &&
+//     usersInRoom.push({ userId, socketId });
+// };
 
 const removeUser = (socketId) => {
     users = users.filter((user) => user.socketId !== socketId);
@@ -37,15 +37,17 @@ io.on("connection", (socket) => {
     });
 
     //send and get message
-    socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+    socket.on("sendMessage", ({ senderId, receiverId, text, coverPicture, username }) => {
         try{
-            console.log("line 34 senderId,receiverId,text",senderId, receiverId, text)
+            console.log("line 34 senderId,receiverId,text",senderId, receiverId, text, coverPicture, username)
             console.log("line 35 users",users)
             const user = getUser(receiverId);
             console.log("line 37 user", user)
             io.to(user.socketId).emit("getMessage", {
                 senderId,
                 text,
+                coverPicture,
+                username
             });
         }
         catch(err){
@@ -55,26 +57,30 @@ io.on("connection", (socket) => {
     });
 
     //take userId and socketId from userRppm
-    socket.on("addUserToRoom", (userId) => {
-        console.log("line 27 userId",userId)
-        addUserToRoom(userId, socket.id);
-        io.emit("getUsersInRoom", usersInRoom);
-    });
+
+    // socket.on("addUserToRoom", (userId) => {
+    //     console.log("line 27 userId",userId)
+    //     addUserToRoom(userId, socket.id);
+    //     io.emit("getUsersInRoom", usersInRoom);
+    // });
 
     //send and get message in room
-    socket.on("sendMessageToRoom", ({ senderId, roomId, text }) => {
+    socket.on("sendMessageToRoom", ({ senderId, roomId, text, coverPicture, username }) => {
         try{
-            console.log("line 53",senderId, roomId, text)
-            console.log("line 54 ",users)
+            socket.join(roomId);
+            console.log("line 68",senderId, roomId, text, coverPicture, username)
+        
             // const user = getUser(receiverId);
             // console.log("line 37 user", user)
-            io.to(roomId).emit("getMessage", {
+            socket.to(roomId).emit("getMessage", {
                 senderId,
                 text,
+                coverPicture,
+                username
             });
         }
         catch(err){
-            console.log("line 45", err)
+            console.log("line 78", err)
         }
 
     });
@@ -83,6 +89,7 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log("a user disconnected!");
         removeUser(socket.id);
+        // socket.leave(roomId);
         io.emit("getUsers", users);
     });
 });
