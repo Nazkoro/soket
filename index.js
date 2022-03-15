@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
     });
 
     //send and get message
-    socket.on("sendMessage", ({ senderId, receiverId, text, coverPicture, username }) => {
+    socket.on("sendMessage", ({ senderId, receiverId, text, coverPicture, username, roomId }) => {
         try{
             console.log("line 34 senderId,receiverId,text",senderId, receiverId, text, coverPicture, username)
             console.log("line 35 users",users)
@@ -47,7 +47,8 @@ io.on("connection", (socket) => {
                 senderId,
                 text,
                 coverPicture,
-                username
+                username,
+                roomId
             });
         }
         catch(err){
