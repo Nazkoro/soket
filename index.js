@@ -6,6 +6,7 @@ const io = require("socket.io")(8900, {
 console.log("server start")
 let users = [];
 let usersInRoom = [];
+let map = new Map();
 
 const addUser = (userId, socketId) => {
     !users.some((user) => user.userId === userId) &&
@@ -24,6 +25,8 @@ const removeUser = (socketId) => {
 const getUser = (userId) => {
     return users.find((user) => user.userId === userId);
 };
+map.set(1, 1)
+
 
 io.on("connection", (socket) => {
     //when ceonnect
@@ -41,14 +44,31 @@ io.on("connection", (socket) => {
         try{
             console.log("line 34 senderId,receiverId,text",senderId, receiverId, text, coverPicture, username)
             console.log("line 35 users",users)
+
             const user = getUser(receiverId);
             console.log("line 37 user", user)
+            
+
+            for (let key of map.keys()) {
+                if(key === roomId._id){
+                    let countmessage = map.get(roomId._id)
+                    map.set(roomId._id, countmessage + 1)
+                } 
+              }
+              if(map.get(roomId._id) == undefined){
+                map.set(roomId._id, 1)
+              }
+             
+              console.log("map.get(roomId._id)", map.get(roomId._id))
+            
+              
             io.to(user.socketId).emit("getMessage", {
                 senderId,
                 text,
                 coverPicture,
                 username,
-                roomId
+                roomId,
+                countMessage: map.get(roomId._id)
             });
         }
         catch(err){
