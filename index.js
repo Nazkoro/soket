@@ -40,13 +40,15 @@ io.on("connection", (socket) => {
     });
 
     //send and get message
-    socket.on("sendMessage", ({ senderId, receiverId, text, coverPicture, username, roomId }) => {
+    socket.on("sendMessage", ({ senderId, receiverId, text, coverPicture, username, roomId, clearCountMessage }) => {
         try{
-            console.log("line 34 senderId,receiverId,text",senderId, receiverId, text, coverPicture, username)
+            console.log("line 34 senderId,receiverId,text,...,roomId,clearCountMessage }}}}{{{",senderId, receiverId, text, coverPicture, username,roomId._id,clearCountMessage)
             console.log("line 35 users",users)
 
             const user = getUser(receiverId);
             console.log("line 37 user", user)
+
+
             
 
             for (let key of map.keys()) {
@@ -57,6 +59,11 @@ io.on("connection", (socket) => {
               }
               if(map.get(roomId._id) == undefined){
                 map.set(roomId._id, 1)
+              }
+
+              if(clearCountMessage) {
+                  console.log("----drop value from roomId-----")
+                map.set(roomId._id, 0)
               }
              
               console.log("map.get(roomId._id)", map.get(roomId._id))
